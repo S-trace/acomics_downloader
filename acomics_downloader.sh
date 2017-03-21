@@ -19,14 +19,14 @@ usage() {
 download_single_page() {
 	comics_name="$1"
 	page_number="$2"
-	image_url="$(curl --cookie ageRestrict="$AGE" --location "$ACOMICS/~$comics_name/$page_number" 2>/dev/null |tr '\"' '\n'|grep 'upload/!c/'|head -n 1)"
+	image_url="$(curl --cookie ageRestrict="$AGE" --location "$ACOMICS/~$comics_name/$page_number" 2>/dev/null |tr '\";' '\n'|grep '/upload/!c/.*/.*/[0-9]\{6,\}-'|head -n 1)"
 	# Workaround for acomics.ru: it returns last page if requested page is not exist, so we need to track image URLs to catch this and handle it
 	if [ q"$image_url" != q"$last_image_url" ]; then
 		last_image_url="$image_url"
 		filename="$(printf "%06d" "$page_number")_$(basename "$image_url")"
 		echo "Downloading page $page_number from '$image_url' to '$filename'"
 		# This wget call is async to make things faster. But may be sync too, so try to remove & in case of issues
-		wget "$ACOMICS/$image_url" -c -O "$filename"&
+		wget "${ACOMICS}${image_url}" -c -O "$filename"&
 	else
 		echo "All pages downloaded"
 		exit
